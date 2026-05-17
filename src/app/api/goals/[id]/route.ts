@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getTokenFromRequest, unauthorized, notFound, forbidden } from '@/lib/server-auth';

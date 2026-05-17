@@ -1,21 +1,47 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-// Supports both old anon key format and new publishable key format
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// Lazy singleton — initialized only at request time, never at build time
+let _admin: SupabaseClient | null = null;
+let _client: SupabaseClient | null = null;
 
-// Client-side Supabase (public)
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export function getSupabaseAdmin(): SupabaseClient {
+  if (!_admin) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key =
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Server-side Supabase — uses service role if available, else falls back to anon key
-// With RLS disabled (see SQL schema), anon key has full access
-export const supabaseAdmin = createClient(
-  supabaseUrl,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseKey,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
+    if (!url || !key) {
+      throw new Error(
+        'Missing Supabase env vars: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set in Vercel dashboard.'
+      );
+    }
+    _admin = createClient(url, key, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
   }
-);
+  return _admin;
+}
+
+export function getSupabase(): SupabaseClient {
+  if (!_client) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) throw new Error('Missing Supabase env vars');
+    _client = createClient(url, key);
+  }
+  return _client;
+}
+
+// Keep named exports for backwards compat (lazy getters)
+export const supabaseAdmin = new Proxy({} as SupabaseClient, {
+  get(_, prop) {
+    return (getSupabaseAdmin() as any)[prop];
+  },
+});
+
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_, prop) {
+    return (getSupabase() as any)[prop];
+  },
+});
