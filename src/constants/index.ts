@@ -1,4 +1,4 @@
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// API is served by Next.js route handlers at /api/*
 
 export const MAX_GOALS = 8;
 export const MIN_WEIGHTAGE = 10;

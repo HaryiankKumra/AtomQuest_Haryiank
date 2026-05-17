@@ -1,36 +1,170 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AtomQuest_Haryiank
 
-## Getting Started
+## 🏆 ATOMQUEST Hackathon 1.0 — In-House Goal Setting & Tracking Portal (GSTP)
 
-First, run the development server:
+> **Built by:** Haryiank Kumra  
+> **Problem Statement:** In-House Goal Setting & Tracking Portal  
+> **Stack:** Next.js 14 · TypeScript · Supabase · Tailwind CSS · Recharts
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 🚀 What Was Built
+
+A **production-grade enterprise web application** that digitizes the full employee goal lifecycle — from creation and submission, through manager approval, to quarterly check-ins and performance analytics.
+
+### ✅ Features Delivered
+
+| Feature | Status |
+|---|---|
+| Employee goal creation (max 8, min 10% weightage) | ✅ |
+| Weightage auto-validation (must sum to exactly 100%) | ✅ |
+| Manager L1 Approval Workflow (approve/reject/request revision) | ✅ |
+| Goal locking on approval (no edits without admin unlock) | ✅ |
+| Quarterly Check-ins with progress scoring | ✅ |
+| Admin control panel (unlock requests, audit trail, analytics) | ✅ |
+| Role-based access control (Employee / Manager / Admin) | ✅ |
+| Full audit log (every action tracked) | ✅ |
+| Analytics dashboard with charts (QoQ trends, dept breakdown) | ✅ |
+| CSV export of all goal data | ✅ |
+| Shared Goals (Admin/Manager pushes dept KPI to employees) | ✅ |
+| JWT authentication with 8hr sessions | ✅ |
+| Dark mode premium enterprise UI | ✅ |
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────┐
+│   Next.js 14 (App Router)       │  ← Frontend + Backend (Serverless)
+│   TypeScript · Tailwind · RHF   │
+│   Recharts · Zustand · Zod      │
+├─────────────────────────────────┤
+│   Next.js API Routes (/api/*)   │  ← Business logic, JWT auth, RBAC
+│   bcryptjs · jsonwebtoken        │
+├─────────────────────────────────┤
+│   Supabase (PostgreSQL)         │  ← Database (7 tables)
+│   RLS disabled for demo         │
+└─────────────────────────────────┘
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Deployed entirely on Vercel** — no separate backend server needed.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📁 Project Structure
 
-## Learn More
+```
+src/
+├── app/
+│   ├── (auth)/login/          # Login page
+│   ├── (app)/
+│   │   ├── dashboard/         # KPI overview + charts
+│   │   ├── goals/             # Goal management (CRUD)
+│   │   ├── checkins/          # Quarterly check-ins
+│   │   ├── notifications/     # Notification center
+│   │   ├── manager/
+│   │   │   ├── approvals/     # Approval queue
+│   │   │   └── team/          # Team goal overview
+│   │   └── admin/
+│   │       ├── dashboard/     # Admin KPI panel
+│   │       ├── analytics/     # Enterprise analytics
+│   │       ├── audit/         # Full audit trail
+│   │       └── unlock/        # Goal unlock requests
+│   └── api/                   # All Next.js route handlers
+│       ├── auth/login/
+│       ├── goals/
+│       ├── approvals/
+│       ├── checkins/
+│       ├── notifications/
+│       ├── analytics/
+│       ├── admin/
+│       └── seed/              # Demo data loader
+├── components/
+│   ├── layout/                # Sidebar, AppShell
+│   ├── shared/                # KPICard, StatusBadge, Toast
+│   └── analytics/             # Chart components (SSR-safe)
+└── lib/
+    ├── api/                   # Typed API client modules
+    ├── store/                 # Zustand auth store
+    ├── supabase.ts            # Supabase client
+    ├── server-auth.ts         # JWT signing/verification
+    └── server-utils.ts        # Progress engine, audit logger
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🗄️ Database Schema (Supabase)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+7 tables: `users`, `goals`, `goal_approvals`, `quarterly_checkins`, `audit_logs`, `notifications`, `shared_goal_groups`
 
-## Deploy on Vercel
+See [`../supabase_schema.sql`](../supabase_schema.sql) for the full schema.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## ⚡ Local Setup
+
+```bash
+# 1. Install deps
+npm install --legacy-peer-deps
+
+# 2. Set env vars — create .env.local:
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+JWT_SECRET=your-secret-min-32-chars
+
+# 3. Run Supabase SQL schema (supabase_schema.sql) in Supabase SQL Editor
+
+# 4. Start dev server
+npm run dev
+
+# 5. Seed demo data
+curl -X POST http://localhost:3000/api/seed
+```
+
+---
+
+## 🔑 Demo Credentials
+
+| Role | Email | Password |
+|---|---|---|
+| 👑 Admin | `admin@gstp.dev` | `Admin@123` |
+| 👔 Manager (Eng) | `manager1@gstp.dev` | `Manager@123` |
+| 👔 Manager (Sales) | `manager2@gstp.dev` | `Manager@123` |
+| 👤 Employee (Alex) | `emp1@gstp.dev` | `Emp@123` |
+| 👤 Employee (Riya) | `emp2@gstp.dev` | `Emp@123` |
+| 👤 Employee (Daniel) | `emp3@gstp.dev` | `Emp@123` |
+
+---
+
+## 🚀 Deploy to Vercel
+
+1. Push this repo to GitHub
+2. Import in [vercel.com](https://vercel.com)
+3. Add these Environment Variables in Vercel dashboard:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+JWT_SECRET=...
+```
+
+4. Click Deploy ✅
+
+---
+
+## 📋 Business Rules Enforced
+
+- Max **8 goals** per employee per cycle
+- Minimum **10% weightage** per goal
+- Total weightage must equal **exactly 100%** before submission
+- Goals are **locked** after manager approval
+- Only **Admin** can unlock goals for revision
+- **Shared goals**: title & target read-only, only weightage adjustable
+- **Audit trail** on every create/update/approval/deletion
+
+---
+
+*Built for ATOMQUEST Hackathon 1.0 — "In-House Goal Setting & Tracking Portal"*
